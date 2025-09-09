@@ -40,11 +40,9 @@ public:
                             is_leader_ ? "LEADER" : "FOLLOWER", drone_id_, leader_id_);
             });
 
-        // Publisher for local setpoint using improved QoS
         std::string topic = "/drone" + std::to_string(drone_id_) + "/setpoint_position/local";
         setpoint_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(topic, mavros_qos);
 
-        // Subscribe to leader setpoints using improved QoS
         leader_setpoint_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
             "/fleet/leader_setpoint", mavros_qos,
             [this](geometry_msgs::msg::PoseStamped::SharedPtr msg) {

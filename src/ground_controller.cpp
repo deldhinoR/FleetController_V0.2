@@ -52,64 +52,23 @@ public:
             if (line.empty()) continue;
 
             if (line == "land") {
-                publish_land();
-                continue;
-            }
+                publish_land();continue;}
 
             if (line == "ready") {
-                publish_offboard();
-                continue;
-            }
+                publish_offboard();continue;}
 
             if (line == "arm") {
-                publish_arm();
-                continue;
-            }
+                publish_arm(); continue;}
 
-            if (line == "land_1") {
-                publish_land_only(1);
-                continue;
-            }
-            
-            if (line == "ready_1") {
-                publish_offboard_only(1);
-                continue;
-            }
-
-            if (line == "arm_1") {
-                publish_arm_only(1);
-                continue;
-            }
-
-            if (line == "land_2") {
-                publish_land_only(2);
-                continue;
-            }
-
-            if (line == "ready_2") {
-                publish_offboard_only(2);
-                continue;
-            }
-
-            if (line == "arm_2") {
-                publish_arm_only(2);
-                continue;
-            }
-
-            if (line == "land_3") {
-                publish_land_only(3);
-                continue;
-            }
-
-            if (line == "ready_3") {
-                publish_offboard_only(3);
-                continue;
-            }
-
-            if (line == "arm_3") {
-                publish_arm_only(3);
-                continue;
-            }
+            if (line == "land_1") {publish_land_only(1);continue;}
+            if (line == "ready_1") {publish_offboard_only(1);continue;}
+            if (line == "arm_1") {publish_arm_only(1); continue;}
+            if (line == "land_2") {publish_land_only(2);continue;}
+            if (line == "ready_2") {publish_offboard_only(2);continue;}
+            if (line == "arm_2") {publish_arm_only(2);continue;}
+            if (line == "land_3") {publish_land_only(3);continue;}
+            if (line == "ready_3") {publish_offboard_only(3);continue;}
+            if (line == "arm_3") {publish_arm_only(3);continue;}
 
 
             if (line == "exit") {
