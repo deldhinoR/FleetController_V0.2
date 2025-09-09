@@ -1,5 +1,7 @@
 # FleetController V0.2
 
+⚠️ **Warning: This controller has NOT been tested on real UAVs. Use only in simulation environments.**
+
 A more advanced and realistic **3-UAV fleet controller** using ROS2 and MAVROS. This version implements a **triangular formation** and supports leader-follower coordination.
 
 ## Features
