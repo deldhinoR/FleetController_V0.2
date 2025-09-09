@@ -27,6 +27,7 @@ A more advanced and realistic **3-UAV fleet controller** using ROS2 and MAVROS. 
    - Allows dynamic formation adjustments if the leader changes.
 
 3. **Modes & Commands**  
-   - Set the mode of each drone (e.g., OFFBOARD, LAND, ARM).  
+   - Set the mode of each drone in one (e.g., OFFBOARD, LAND, ARM).
+   - Set the mode of each drone seperately (e.g., OFFBOARD_1, LAND_2, ARM_3).    
    - Move drones by publishing setpoints to the leader.  
 
