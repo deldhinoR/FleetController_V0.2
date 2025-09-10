@@ -4,9 +4,9 @@ from launch.actions import ExecuteProcess
 
 def generate_launch_description():
     drones = [
-        {"id": 1, "fcu_url": "udp://:14541@127.0.0.1:14557", "tgt_system": 2, "offset": [0.0, 0.0, 0.0]},
-        {"id": 2, "fcu_url": "udp://:14542@127.0.0.1:14557", "tgt_system": 3, "offset": [-5.0, 2.9, 0.0]},
-        {"id": 3, "fcu_url": "udp://:14543@127.0.0.1:14557", "tgt_system": 4, "offset": [-5.0, -2.9, 0.0]},
+        {"id": 1, "fcu_url": "udp://:14541@127.0.0.1:14557", "tgt_system": 2},
+        {"id": 2, "fcu_url": "udp://:14542@127.0.0.1:14557", "tgt_system": 3},
+        {"id": 3, "fcu_url": "udp://:14543@127.0.0.1:14557", "tgt_system": 4},
     ]
 
     actions = []
@@ -30,21 +30,21 @@ def generate_launch_description():
 
 
         # Convert offset list to string for ROS2 CLI
-        offset_str = "[" + ",".join(str(v) for v in drone["offset"]) + "]"
+        # offset_str = "[" + " ".join(str(v) for v in drone["offset"]) + "]"
 
         # Mission computer (drone_mc) for this drone
         actions.append(
-            ExecuteProcess(
-                cmd=[
-                    # //debug//       "gnome-terminal", "--",
-                    "ros2", "run", "px4_test_scripts", "drone_mc",
-                    "--ros-args",
-                    "-p", f"drone_id:={drone['id']}",
-                    "-p", f"offset:={offset_str}"
-                ],
-                output="screen"
-            )
-        )
+    ExecuteProcess(
+        cmd=[
+            # //debug//       "gnome-terminal", "--",
+            "ros2", "run", "px4_test_scripts", "drone_mc",
+            "--ros-args",
+            "-p", f"drone_id:={drone['id']}",
+            # "-p", f"offset:={offset_str}"
+        ],
+        output="screen"
+    )
+)
     actions.append(
         ExecuteProcess(
             cmd=[
