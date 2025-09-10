@@ -110,7 +110,7 @@ private:
                 offset_ = {0.0, 0.0, 0.0};
                 break;
             case 2:
-                offset_ = {-height, -triangle_side/2.0, 0.0};
+                offset_ = {-height, -triangle_side / 2.0, 0.0};
                 break;
             case 3:
                 offset_ = {height, -triangle_side * 2 , 0.0};
