@@ -30,7 +30,7 @@ A more advanced and realistic **3-UAV fleet controller** using ROS2 and MAVROS w
 3. **Modes & Commands**  
    - Set the mode of each drone in one (e.g., OFFBOARD, LAND, ARM).
    - Set the mode of each drone seperately (e.g., OFFBOARD_1, LAND_2, ARM_3).
-   - Set the control mode to manual to move with arrow keys and h(increase altitude),j(decrease altitude)(Usage:type manual in terminal ESC to exit).
+   - Set the control mode to manual to move with arrow keys and 'H'(increase altitude),'J'(decrease altitude)(Usage:type manual in terminal ESC to exit).
    - Set the flying formations (e.g., FORMAT_5, FORMAT_2(Default)).    
    - Move drones by publishing setpoints to the leader.  
 
