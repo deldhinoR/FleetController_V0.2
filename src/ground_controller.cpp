@@ -14,6 +14,8 @@
 #include "mavros_msgs/srv/set_mode.hpp"
 #include "mavros_msgs/srv/command_bool.hpp"
 #include "std_msgs/msg/string.hpp"
+#include <termios.h>
+#include <unistd.h>
 
 using namespace std::chrono_literals;
 
@@ -67,7 +69,11 @@ public:
                     RCLCPP_INFO(this->get_logger(), "Formation updated to: %s", line.c_str());
                     continue;
                 }
-
+                if (line == "manual") {
+                    manual_mode = true;
+                    manual_control_loop();
+                    continue;
+                }
 
                 if (line == "land_1") { publish_land_only(1); continue; }
                 if (line == "ready_1") { publish_offboard_only(1); continue; }
@@ -147,6 +153,38 @@ private:
         }
         return true;
     }
+
+    char get_keyPress() {
+    char buf = 0;
+    struct termios old = {};
+    if (tcgetattr(STDIN_FILENO, &old) < 0) perror("tcgetattr()");
+    struct termios newt = old;
+    newt.c_lflag &= ~(ICANON | ECHO); // disable buffering and echo
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &newt) < 0) perror("tcsetattr ICANON");
+
+    if (read(STDIN_FILENO, &buf, 1) < 0) perror("read()");
+
+    if (buf == '\033') { // escape sequence
+        char seq[2];
+        if (read(STDIN_FILENO, &seq[0], 1) == 0) { tcsetattr(STDIN_FILENO, TCSANOW, &old); return '\033'; } // ESC key alone
+        if (read(STDIN_FILENO, &seq[1], 1) == 0) { tcsetattr(STDIN_FILENO, TCSANOW, &old); return '\033'; }
+
+        // Arrow keys send: ESC [ A/B/C/D
+        if (seq[0] == '[') {
+            switch(seq[1]) {
+                case 'A': buf = 'U'; break; // UP
+                case 'B': buf = 'D'; break; // DOWN
+                case 'C': buf = 'R'; break; // RIGHT
+                case 'D': buf = 'L'; break; // LEFT
+                default: buf = 0; break;
+            }
+        }
+    }
+
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &old) < 0) perror("tcsetattr ~ICANON");
+    return buf;
+}
+
 
     void publish_setpoint() {
         std::lock_guard<std::mutex> lock(pose_mutex_);
@@ -283,6 +321,36 @@ private:
             });
     }
 
+    void manual_control_loop() {
+    RCLCPP_INFO(this->get_logger(), "Manual mode activated. Arrow keys to move, ESC to exit.");
+    double step = 1.0; // 1 meter per key press
+
+    while (manual_mode && rclcpp::ok()) {
+        char key = get_keyPress();
+        {
+            std::lock_guard<std::mutex> lock(pose_mutex_);
+
+            switch(key) {
+                case 'U': y_ += step; break; // UP arrow 
+                case 'D': y_ -= step; break; // DOWN
+                case 'L': x_ -= step; break; // LEFT arrow → move left
+                case 'R': x_ += step; break; // RIGHT arrow → move right
+                case '\033': // ESC key
+                    manual_mode = false;
+                    RCLCPP_INFO(this->get_logger(), "Exiting manual mode...");
+                    break;
+            }
+
+            if (key == 'U' || key == 'D' || key == 'L' || key == 'R') {
+                RCLCPP_INFO(this->get_logger(), "Manual move: x=%.2f y=%.2f z=%.2f", x_, y_, z_);
+            }
+        }
+        std::this_thread::sleep_for(50ms);
+    }
+}
+
+
+
     // ---------------- Members ----------------
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr setpoint_pub_;
     rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr leader_pub_;
@@ -291,6 +359,7 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
     double x_, y_, z_;
     int leader_id_;
+    bool manual_mode = false;
     std::mutex pose_mutex_;
     std::map<std::string, rclcpp::Client<mavros_msgs::srv::SetMode>::SharedPtr> setmode_clients_;
     std::map<std::string, rclcpp::Client<mavros_msgs::srv::CommandBool>::SharedPtr> arm_clients_;
