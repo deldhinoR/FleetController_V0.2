@@ -14,7 +14,7 @@ A more advanced and realistic **3-UAV fleet controller** using ROS2 and MAVROS w
   - **Move drones in real-time**
 - Consists of two main scripts:
   - `drone_mc`: handles individual UAV control  
-  - `ground_control`: manages fleet coordination and leader assignment  
+  - `ground_controller`: manages fleet coordination and leader assignment  
 
 ## How It Works
 
@@ -28,6 +28,7 @@ A more advanced and realistic **3-UAV fleet controller** using ROS2 and MAVROS w
 
 3. **Modes & Commands**  
    - Set the mode of each drone in one (e.g., OFFBOARD, LAND, ARM).
-   - Set the mode of each drone seperately (e.g., OFFBOARD_1, LAND_2, ARM_3).    
+   - Set the mode of each drone seperately (e.g., OFFBOARD_1, LAND_2, ARM_3).
+   - Set the flying formations (e.g., FORMAT_5, FORMAT_2(Default)).    
    - Move drones by publishing setpoints to the leader.  
 
