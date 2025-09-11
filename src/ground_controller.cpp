@@ -331,10 +331,14 @@ private:
             std::lock_guard<std::mutex> lock(pose_mutex_);
 
             switch(key) {
-                case 'U': y_ += step; break; // UP arrow 
-                case 'D': y_ -= step; break; // DOWN
+                case 'U': y_ += step; break; // UP arrow → move forward
+                case 'D': y_ -= step; break; // DOWN ARROW → move back
                 case 'L': x_ -= step; break; // LEFT arrow → move left
                 case 'R': x_ += step; break; // RIGHT arrow → move right
+                case 'h': z_ += step; break; //H KEY ALTITUDE UP
+                case 'j': z_ -= step; break; //J KEY ALTITUDE DOWN
+                case 'H': z_ += step; break; //H KEY ALTITUDE UP
+                case 'J': z_ -= step; break; //J KEY ALTITUDE DOWN
                 case '\033': // ESC key
                     manual_mode = false;
                     RCLCPP_INFO(this->get_logger(), "Exiting manual mode...");
