@@ -9,7 +9,7 @@ A more advanced and realistic **3-UAV fleet controller** using ROS2 and MAVROS w
 - Controls **3 UAVs** flying in a triangular formation.
 - One UAV acts as the **leader** (can be changed dynamically).
 - Leader receives setpoints directly, while **followers subscribe to the leader's setpoints**.
--Can control manually.
+- Manual fleet control.
 - Terminal commands allow you to:
   - **Set flight modes**  
   - **Move drones in real-time**
