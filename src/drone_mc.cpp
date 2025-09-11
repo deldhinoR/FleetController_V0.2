@@ -3,21 +3,26 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <regex>
 
 #include <Eigen/Geometry>
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "std_msgs/msg/int32.hpp"
+#include "std_msgs/msg/string.hpp"
 
 using namespace std::chrono_literals;
 
 class DroneMC : public rclcpp::Node {
 public:
     DroneMC() : Node("drone_node"), leader_id_(1) {
-        // Declare drone ID parameter
+        // Declare parameters
         this->declare_parameter<int>("drone_id", 0);
         this->get_parameter("drone_id", drone_id_);
+
+        this->declare_parameter<std::string>("formation_mode", "format_2");
+        this->get_parameter("formation_mode", formation_mode_);
 
         // Optional publisher for leader ID
         leader_pub_ = this->create_publisher<std_msgs::msg::Int32>("/fleet/leader_id", 10);
@@ -37,12 +42,24 @@ public:
                 leader_id_ = msg->data;
                 is_leader_ = (drone_id_ == leader_id_);
             });
+        
+        rclcpp::QoS qos_formation(10);
+        formation_sub_ = this->create_subscription<std_msgs::msg::String>(
+            "/fleet/formation_mode", qos_formation,
+            [this](const std_msgs::msg::String::SharedPtr msg) {  
+                formation_mode_ = msg->data;
+                compute_formation_offset();
+                RCLCPP_INFO(this->get_logger(),
+                            "Formation mode changed to %s, recomputed offset",
+                    formation_mode_.c_str());
+    });
+
 
         // Status timer
         status_timer_ = this->create_wall_timer(
             10s, [this]() {
-                RCLCPP_INFO(this->get_logger(), "I am %s (drone%d), leader=%d",
-                            is_leader_ ? "LEADER" : "FOLLOWER", drone_id_, leader_id_);
+                RCLCPP_INFO(this->get_logger(), "I am %s (drone%d), leader=%d, formation=%s",
+                            is_leader_ ? "LEADER" : "FOLLOWER", drone_id_, leader_id_, formation_mode_.c_str());
             });
 
         // Publisher for drone setpoint
@@ -72,9 +89,8 @@ public:
                                          msg->pose.orientation.z);
 
                     // Extract yaw rotation around Z
-                    double roll, pitch, yaw;
                     Eigen::Vector3d euler = q.toRotationMatrix().eulerAngles(0, 1, 2);
-                    yaw = euler[2];
+                    double yaw = euler[2];
 
                     // Rotation matrix for yaw
                     Eigen::Matrix3d R = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
@@ -102,8 +118,17 @@ public:
 
 private:
     void compute_formation_offset() {
-        const double triangle_side = 2.0;
-        const double height = std::sqrt(3)/2 * triangle_side;
+        // Default side length
+        double triangle_side = 2.0;
+
+        // Parse formation_mode like "format_5"
+        std::smatch match;
+        std::regex re("format_(\\d+)");
+        if (std::regex_match(formation_mode_, match, re)) {
+            triangle_side = std::stod(match[1].str());
+        }
+
+        double height = std::sqrt(3) / 2 * triangle_side;
 
         switch(drone_id_) {
             case 1: // leader
@@ -113,7 +138,7 @@ private:
                 offset_ = {-height, -triangle_side / 2.0, 0.0};
                 break;
             case 3:
-                offset_ = {height, -triangle_side * 2 , 0.0};
+                offset_ = {height, -triangle_side * 2, 0.0};
                 break;
             default:
                 offset_ = {0.0, 0.0, 0.0};
@@ -124,10 +149,13 @@ private:
     int drone_id_;
     int leader_id_;
     bool is_leader_;
+    std::string formation_mode_;
     std::array<double,3> offset_;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr setpoint_pub_;
     rclcpp::TimerBase::SharedPtr status_timer_;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr leader_id_sub_;
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr formation_sub_;
+
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr leader_setpoint_sub_;
     rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr leader_pub_;
 };

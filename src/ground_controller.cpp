@@ -13,6 +13,7 @@
 #include "std_msgs/msg/int32.hpp"
 #include "mavros_msgs/srv/set_mode.hpp"
 #include "mavros_msgs/srv/command_bool.hpp"
+#include "std_msgs/msg/string.hpp"
 
 using namespace std::chrono_literals;
 
@@ -24,6 +25,9 @@ public:
 
         leader_pub_ = this->create_publisher<std_msgs::msg::Int32>(
             "/fleet/leader_id", 10);
+
+        formation_pub_ = this->create_publisher<std_msgs::msg::String>(
+            "/fleet/formation_mode", 10);
 
         timer_ = this->create_wall_timer(
             50ms, std::bind(&GroundControl::publish_setpoint, this));
@@ -56,6 +60,14 @@ public:
                 if (line == "land") { publish_land(); continue; }
                 if (line == "ready") { publish_offboard(); continue; }
                 if (line == "arm") { publish_arm(); continue; }
+                if (line.rfind("format_", 0) == 0) {
+                    std_msgs::msg::String msg;
+                    msg.data = line;  // e.g., "format_5"
+                    formation_pub_->publish(msg);
+                    RCLCPP_INFO(this->get_logger(), "Formation updated to: %s", line.c_str());
+                    continue;
+                }
+
 
                 if (line == "land_1") { publish_land_only(1); continue; }
                 if (line == "ready_1") { publish_offboard_only(1); continue; }
@@ -274,6 +286,8 @@ private:
     // ---------------- Members ----------------
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr setpoint_pub_;
     rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr leader_pub_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr formation_pub_;
+
     rclcpp::TimerBase::SharedPtr timer_;
     double x_, y_, z_;
     int leader_id_;
