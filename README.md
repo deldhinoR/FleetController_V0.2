@@ -25,7 +25,7 @@ A more advanced and realistic **3-UAV fleet controller** using ROS2 and MAVROS w
 
 2. **Triangular Formation**  
    - Maintains a stable triangular formation around the leader.  
-   - Allows dynamic formation adjustments if the leader changes.
+
 
 3. **Modes & Commands**  
    - Set the mode of each drone in one (e.g., OFFBOARD, LAND, ARM).
