@@ -130,6 +130,7 @@ private:
 
         double height = std::sqrt(3) / 2 * triangle_side;
 
+        if(leader_id_ == 1){
         switch(drone_id_) {
             case 1: // leader
                 offset_ = {0.0, 0.0, 0.0};
@@ -143,8 +144,43 @@ private:
             default:
                 offset_ = {0.0, 0.0, 0.0};
                 break;
-        }
-    }
+                }
+            }
+        
+        // if(leader_id_ == 2){
+        // switch(drone_id_) {
+        //     case 1:
+        //         offset_ = {height, triangle_side/2.0, 0.0 };
+        //         break;
+        //     case 2: // leader
+        //         offset_ = {0.0, 0.0, 0.0};
+        //         break;
+        //     case 3:
+        //         offset_ = {2*height, -3*triangle_side/2.0, 0.0} ;
+        //         break;
+        //     default:
+        //         offset_ = {0.0, 0.0, 0.0};
+        //         break;
+        //         }
+        //     }
+
+        // if(leader_id_ == 3){
+        // switch(drone_id_) {
+        //     case 1: 
+        //         offset_ = { -height,   triangle_side*2.0, 0.0 };
+        //         break;
+        //     case 2:
+        //         offset_ = {-2*height,  3*triangle_side/2.0, 0.0 };
+        //         break;
+        //     case 3:// leader
+        //         offset_ = {0.0, 0.0, 0.0};
+        //         break;
+        //     default:
+        //         offset_ = {0.0, 0.0, 0.0};
+        //         break;
+        //             }
+        //         }
+        //     }
 
     int drone_id_;
     int leader_id_;
